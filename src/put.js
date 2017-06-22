@@ -17,38 +17,46 @@ module.exports = function(req, res, urlPieces, model, config) {
 		});
 	}
 	else {
-		let options = {};
-		if(config.putBehavior && config.putBehavior.toLowerCase() === 'update') {
-			options.method = 'update';
+	    let options = {};
+	    if(config.putBehavior && config.putBehavior.toLowerCase() === 'update') {
+		    options.method = 'update';
 		}
-		let promise = model;
-		let hasTimestamps = ['created_at', 'updated_at'](model.hasTimestamps ? void 0 : []);
-		if(hasTimestamps.indexOf(config.deletedAttribute) >= 0) {
-			promise = promise.where(config.deletedAttribute, null);
-		}
-		return promise.save(req.body, options).then(savedModel => {
-			res.json(savedModel.toJSON());
-		})
+	    let promise = model;
+	    let hasTimestamps = null;
+	    if (model.hasTimestamps === false) {
+		hasTimestamps = [];
+	    } else {
+		hasTimestamps = model.hasTimestamps;
+	    }
+	    if (typeof hasTimestamps === 'boolean') {
+		hasTimestamps = ['created_at', 'updated_at'];
+	    }
+	    if(hasTimestamps.indexOf(config.deletedAttribute) >= 0) {
+		promise = promise.where(config.deletedAttribute, null);
+	    }
+	    return promise.save(req.body, options).then(savedModel => {
+		res.json(savedModel.toJSON());
+	    })
 		.catch(err => {
-			let status = 500;
-			if(err.message === 'No Rows Updated') {
-				list.add('RECORD_NOT_FOUND', {
-					model: urlPieces[0],
-					id: urlPieces[1]
-				});
-				status = config.errors.RECORD_NOT_FOUND.status;
-			}
-			else {
-				list.add('UNKNOWN', { error: err.toString() });
-				status = config.errors.UNKNOWN.status;
-			}
-			res.status(status).json(list.toObject());
+		    let status = 500;
+		    if(err.message === 'No Rows Updated') {
+			list.add('RECORD_NOT_FOUND', {
+			    model: urlPieces[0],
+			    id: urlPieces[1]
+			});
+			status = config.errors.RECORD_NOT_FOUND.status;
+		    }
+		    else {
+			list.add('UNKNOWN', { error: err.toString() });
+			status = config.errors.UNKNOWN.status;
+		    }
+		    res.status(status).json(list.toObject());
 		})
 		.then(() => {
-			return Promise.resolve({
-				urlPieces: urlPieces,
-				model: model
-			});
+		    return Promise.resolve({
+			urlPieces: urlPieces,
+			model: model
+		    });
 		});
 	}	
 };

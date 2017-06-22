@@ -8,7 +8,15 @@ module.exports = function(req, res, urlPieces, model, config) {
 		}
 	);
 
-        let hasTimestamps = ['created_at', 'updated_at'](model.hasTimestamps ? void 0 : []);
+	    let hasTimestamps = null;
+	    if (model.hasTimestamps === false) {
+		hasTimestamps = [];
+	    } else {
+		hasTimestamps = model.hasTimestamps;
+	    }
+	    if (typeof hasTimestamps === 'boolean') {
+		hasTimestamps = ['created_at', 'updated_at'];
+	    }
 	if(hasTimestamps.indexOf(config.deletedAttribute) !== -1) {
 		promise = promise.where(config.deletedAttribute, null);
 	}
