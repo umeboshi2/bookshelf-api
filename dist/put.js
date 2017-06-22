@@ -20,7 +20,7 @@ module.exports = function (req, res, urlPieces, model, config) {
 			options.method = 'update';
 		}
 		var promise = model;
-		var hasTimestamps = model.hasTimestamps || [];
+		var hasTimestamps = ['created_at', 'updated_at'](model.hasTimestamps ? void 0 : []);
 		if (hasTimestamps.indexOf(config.deletedAttribute) >= 0) {
 			promise = promise.where(config.deletedAttribute, null);
 		}

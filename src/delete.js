@@ -20,7 +20,7 @@ module.exports = function(req, res, urlPieces, model, config) {
 		let result = {};
 		result[model.idAttribute] = model.id;
 		let promise = null;
-		let hasTimestamps = model.hasTimestamps || [];
+		let hasTimestamps = ['created_at', 'updated_at'](model.hasTimestamps ? void 0 : []);
 		if(hasTimestamps.indexOf(config.deletedAttribute) >= 0 && (!req.hardDelete && !config.hardDelete || (req.hardDelete === false))) {
 			let updatedData = {};
 			updatedData[model.hasTimestamps[2]] = new Date();
