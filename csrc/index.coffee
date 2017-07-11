@@ -10,7 +10,7 @@ pluralize = require('pluralize')
 module.exports = (config) ->
   if !_.isObject(config)
     throw new Howhap(errors.BAD_CONFIG)
-  defaultConfig = 
+  defaultConfig =
     putBehavior: 'upsert'
     hardDelete: false
     deletedAttribute: 'deletedAt'
