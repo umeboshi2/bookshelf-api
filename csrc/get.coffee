@@ -24,6 +24,9 @@ module.exports = (req, res, urlPieces, model, config) ->
     promise = promise.fetch(fetchParams)
   else
     if req.query
+      # Columns support
+      if req.query.columns
+        fetchParams.columns = req.query.columns
       # Where clause support
       if req.query.where
         if Array.isArray(req.query.where)
