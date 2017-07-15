@@ -33,13 +33,17 @@ module.exports = (req, res, urlPieces, model, config) ->
           promise = promise.where.apply(promise, req.query.where)
         else if Object::toString.call(req.query.where) == '[object Object]'
           promise = promise.where(req.query.where)
-      # Order by support
-      if req.query.sort
+      # Order by support (needed for offset)
+      if req.query.sort or req.query.offset
         direction = req.query.direction or 'ASC'
         direction = direction.toLowerCase()
         promise = promise.query('orderBy', req.query.sort, direction)
-      # Limit support
       # Offset support
+      if req.query.offset
+        promise = promise.offset req.query.offset
+      # Limit support
+      if req.query.limit
+        promise = promise.limit req.query.limit
     promise = promise.fetchAll(fetchParams)
   promise.then((results) ->
     if !results
