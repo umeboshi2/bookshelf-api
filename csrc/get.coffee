@@ -39,15 +39,15 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
           promise = promise.where.apply(promise, req.query.where)
         else if Object::toString.call(req.query.where) == '[object Object]'
           promise = promise.where(req.query.where)
+      # we need to get a total count and include that in response
+      # with collection "{total:count(), items:[]}"
+      # before setting offset and limit
+      total = awaitfun promise.clone().count()
       # Order by support (needed for offset)
       if req.query.sort or req.query.offset
         direction = req.query.direction or 'ASC'
         direction = direction.toLowerCase()
         promise = promise.query('orderBy', req.query.sort, direction)
-      # we need to get a total count and include that in response
-      # with collection "{total:count(), items:[]}"
-      # before setting offset and limit
-      total = awaitfun promise.count()
       # Offset support
       if req.query.offset
         #promise = promise.query((qb) -> qb.offset(req.query.offset))
