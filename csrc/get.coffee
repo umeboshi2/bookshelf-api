@@ -1,7 +1,9 @@
 'use strict'
 HowhapList = require('howhap-list')
+asyncfun = require 'asyncawait/async'
+awaitfun = require 'asyncawait/await'
 
-module.exports = (req, res, urlPieces, model, config) ->
+module.exports = asyncfun (req, res, urlPieces, model, config) ->
   promise = model
   list = new HowhapList(null, availableErrors: config.errors)
   hasTimestamps = null
@@ -19,10 +21,14 @@ module.exports = (req, res, urlPieces, model, config) ->
   fetchParams = {}
   if req.query and Array.isArray(req.query.withRelated)
     fetchParams.withRelated = req.query.withRelated
+  # FIXME is there a better way than a collection/model flag?
+  fetchCollection = undefined
   # Get individual record
   if urlPieces.length > 1
+    fetchCollection = false
     promise = promise.fetch(fetchParams)
   else
+    fetchCollection = true
     if req.query
       # Columns support
       if req.query.columns
@@ -38,12 +44,18 @@ module.exports = (req, res, urlPieces, model, config) ->
         direction = req.query.direction or 'ASC'
         direction = direction.toLowerCase()
         promise = promise.query('orderBy', req.query.sort, direction)
+      # we need to get a total count and include that in response
+      # with collection "{total:count(), items:[]}"
+      # before setting offset and limit
+      total = awaitfun promise.count()
       # Offset support
       if req.query.offset
-        promise = promise.offset req.query.offset
+        #promise = promise.query((qb) -> qb.offset(req.query.offset))
+        promise = promise.query('offset', req.query.offset)
       # Limit support
       if req.query.limit
-        promise = promise.limit req.query.limit
+        #promise = promise.query((qb) -> qb.limit(req.query.limit))
+        promise = promise.query('limit', req.query.limit)
     promise = promise.fetchAll(fetchParams)
   promise.then((results) ->
     if !results
@@ -52,7 +64,11 @@ module.exports = (req, res, urlPieces, model, config) ->
         id: urlPieces[1]
       res.status(config.errors.RECORD_NOT_FOUND.status).json list.toObject()
     else
-      res.json results.toJSON()
+      if fetchCollection
+        data =
+          total: total
+          items: results.toJSON()
+      res.json data
     return
   ).catch((err) ->
     list.add 'RECORD_NOT_FOUND', error: err.toString()
