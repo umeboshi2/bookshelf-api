@@ -5,6 +5,7 @@ awaitfun = require 'asyncawait/await'
 
 module.exports = asyncfun (req, res, urlPieces, model, config) ->
   promise = model
+  
   list = new HowhapList(null, availableErrors: config.errors)
   hasTimestamps = null
   if model.hasTimestamps == false
@@ -68,6 +69,8 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
         data =
           total: total
           items: results.toJSON()
+      else
+        data = results.toJSON()
       res.json data
     return
   ).catch((err) ->
