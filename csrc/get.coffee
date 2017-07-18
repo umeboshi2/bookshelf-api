@@ -40,6 +40,9 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
           promise = promise.where.apply(promise, req.query.where)
         else if Object::toString.call(req.query.where) == '[object Object]'
           promise = promise.where(req.query.where)
+      # distinct column support
+      if req.query.distinct
+        promise = promise.query('distinct', req.query.distinct)
       # we need to get a total count and include that in response
       # with collection "{total:count(), items:[]}"
       # before setting offset and limit
@@ -48,7 +51,13 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
       if req.query.sort or req.query.offset
         direction = req.query.direction or 'ASC'
         direction = direction.toLowerCase()
-        promise = promise.query('orderBy', req.query.sort, direction)
+        if Array.isArray req.query.sort
+          orderExpression = []
+          req.query.sort.forEach (col) ->
+            orderExpression.push "#{col} #{direction}"
+          promise = promise.query('orderByRaw', orderExpression.join(', '))
+        else
+          promise = promise.query('orderBy', req.query.sort, direction)
       # Offset support
       if req.query.offset
         #promise = promise.query((qb) -> qb.offset(req.query.offset))
@@ -57,6 +66,7 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
       if req.query.limit
         #promise = promise.query((qb) -> qb.limit(req.query.limit))
         promise = promise.query('limit', req.query.limit)
+    console.log "fetchParams", fetchParams
     promise = promise.fetchAll(fetchParams)
   promise.then((results) ->
     if !results
