@@ -49,5 +49,4 @@ module.exports = (config) ->
     ), {})
   else
     models = config.models
-  console.log 'models', models
   require('./middleware') models, config
