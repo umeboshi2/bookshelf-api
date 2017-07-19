@@ -46,7 +46,12 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
       # we need to get a total count and include that in response
       # with collection "{total:count(), items:[]}"
       # before setting offset and limit
-      total = awaitfun promise.clone().count()
+      totalClone = promise.clone()
+      # with pg we need to also add group by
+      if req.query.distinct
+        totalClone = totalClone.query 'groupBy', req.query.distinct
+      total = awaitfun totalClone.count()
+
       # Order by support (needed for offset)
       if req.query.sort or req.query.offset
         direction = req.query.direction or 'ASC'
