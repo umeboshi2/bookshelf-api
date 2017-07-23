@@ -71,7 +71,6 @@ module.exports = asyncfun (req, res, urlPieces, model, config) ->
       if req.query.limit
         #promise = promise.query((qb) -> qb.limit(req.query.limit))
         promise = promise.query('limit', req.query.limit)
-    console.log "fetchParams", fetchParams
     promise = promise.fetchAll(fetchParams)
   promise.then((results) ->
     if !results
