@@ -1,11 +1,11 @@
 {
-  "name": "bookshelf-api",
+  "name": "bookshelf-csapi",
   "version": "1.7.1",
-  "description": "Express middleware for generating an API based on bookshelf models.",
+  "description": "Express middleware for generating an API based on bookshelf models, written in coffeescript.",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",
-    "build": "./node_modules/.bin/coffee -bcM -o dist csrc"
+    "build": "./node_modules/.bin/coffee -bcM -o dist src"
   },
   "author": "Aaron Larner",
   "license": "MIT",
